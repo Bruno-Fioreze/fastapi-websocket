@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leilão</title>
+    <!-- Adicionar o Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Adicionar os ícones do Material Design -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1 class="center-align">Informe seu nome e lance abaixo</h1>
+        <div class="row">
+            <form class="col s12" action="" onsubmit="sendBid(event)">
+                <div class="row">
+                    <div class="input-field col s12 m6 offset-m3">
+                        <i class="material-icons prefix">account_circle</i>
+                        <input type="text" id="username" name="username" autocomplete="off" required>
+                        <label for="username">Nome de Usuário</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12 m6 offset-m3">
+                        <i class="material-icons prefix">attach_money</i>
+                        <input type="number" id="bid" name="bid" autocomplete="off" required>
+                        <label for="bid">Lance</label>
+                    </div>
+                </div>
+                <div class="row center-align">
+                    <button class="btn waves-effect waves-light" type="submit">Enviar<i class="material-icons right">send</i></button>
+                </div>
+            </form>
+        </div>
+        <ul class="collection with-header">
+            <li class="collection-header center-align"><h4>Mensagens Recebidas</h4></li>
+            <div id="messages"></div>
+        </ul>
+    </div>
+    <!-- Adicionar o Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        var ws = new WebSocket("ws://localhost:8089/ws"); 
+        ws.onmessage = function(event) {
+            var messages = document.getElementById("messages");
+            var message = document.createElement("li");
+            message.classList.add("collection-item");
+            var content = document.createTextNode(event.data);
+            message.appendChild(content);
+            messages.appendChild(message);
+        };
+        function sendBid(event) {
+            event.preventDefault();
+            var username = document.getElementById("username").value;
+            var bid = document.getElementById("bid").value;
+            var bidData = {username: username, bid: bid};
+            ws.send(JSON.stringify(bidData));
+            document.getElementById("bid").value = "";
+        }
+    </script>
+</body>
+</html>
