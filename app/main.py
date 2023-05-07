@@ -19,7 +19,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
     websockets.append(websocket)
 
-    # Send old messages to new client
     if messages:
         await websocket.send_json(messages)
 
