@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.templating import Jinja2Templates
 
@@ -11,26 +13,20 @@ messages = []
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-async def broadcast(message: str):
-    for websocket in app.websockets:
-        await websocket.send_text(message)
-
-@app.websocket("/ws/")
+@app.websocket("/ws") 
 async def websocket_endpoint(websocket: WebSocket):
-    try:
-        app.websockets.add(websocket)
+    await websocket.accept()
 
-        for message in messages:
-            await websocket.send_text(message)
+    websockets.append(websocket)
 
-        while True:
-            data = await websocket.receive_text()
-            messages.append(data)
+    # Send old messages to new client
+    if messages:
+        await websocket.send_json(messages)
 
-            await broadcast(data)
+    while True:
+        data = await websocket.receive_text()
+        message = f"Message text was: {data}"
+        messages.append(message)
 
-    except Exception as e:
-        print(f"WebSocket error: {e}")
-
-    finally:
-        app.websockets.remove(websocket)
+        for ws in websockets:
+            await ws.send_text(message)
